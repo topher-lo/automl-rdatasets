@@ -3,5 +3,6 @@ streamlit-pandas-profiling
 spacy
 numpy
 numba
+missingno
 pandas
 wheel

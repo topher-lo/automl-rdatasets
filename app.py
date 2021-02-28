@@ -1,6 +1,7 @@
 import streamlit as st
 import spacy
 import pandas as pd
+import missingno as msno
 
 from pandas_profiling import ProfileReport
 from streamlit_pandas_profiling import st_profile_report
@@ -59,9 +60,10 @@ def main():
       🚀 Using the app:\n
       1. Find relevant R datasets using the searchbar
       2. Select a R dataset
-      3. Press the "Data profiling report" button to perform EDA
-      4. From the sidebar: Select an outcome variable in the chosen dataset
-      5. From the sidebar: Choose a supervised ML task to perform
+      3. Press the "Data profiling report" button or "Missing value plots"
+      to perform EDA
+      4. Select an outcome variable in the chosen dataset
+      5. Choose a supervised ML task to perform
       (i.e. regression or classification)
       6. Press the "Run AutoML" button to perform AutoML and generate Python
       code for the best ML pipeline
@@ -71,6 +73,7 @@ def main():
       and cosine similarity
       to perform contextual search
       - Generates the data profiling report using `pandas-profiling`
+      - Generates missing value plots using `missingno`
       - Performs AutoML using `TPOT`
       """
     )
@@ -119,6 +122,38 @@ def main():
     selected_dataset = rdatasets[rdatasets.index == selected_dataset_idx]
     if not(selected_dataset_idx):
         st.stop()
+
+    # Load data from selected url
+    with st.spinner('Loading data...'):
+        url = selected_dataset['CSV'].tolist()[0]
+        documentation = selected_dataset['Doc'].tolist()[0]
+        data = load_data(url=url, index_col=0).reset_index(drop=True)
+        # Reset index
+        st.info('Data loaded with success!')
+        st.success(f'Documentation found [here]({documentation}).')
+
+    # Column containers for buttons
+    st.write('---')
+    col1, col2, col3 = st.beta_columns(3)
+    # Data profiling
+    if col1.button('🔬 Data profiling report'):
+        profile_report = ProfileReport(data, explorative=True)
+        st_profile_report(profile_report)
+    # Missing value analysis
+    if col2.button('🔎 Missing value plots'):
+        # Check if there are any missing values
+        if pd.notna(data).all().all():
+            st.warning('No missing values in dataset')
+        else:
+            fig1 = msno.matrix(data).get_figure()
+            st.pyplot(fig1)
+            fig2 = msno.heatmap(data).get_figure()
+            st.pyplot(fig2)
+            fig3 = msno.dendrogram(data).get_figure()
+            st.pyplot(fig3)
+    # Run data workflow
+    if col3.button('✨ Run AutoML!'):
+        pass
 
 
 if __name__ == "__main__":
