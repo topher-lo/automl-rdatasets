@@ -1,4 +1,27 @@
 import streamlit as st
+import spacy
+import pandas as pd
+
+from pandas_profiling import ProfileReport
+from streamlit_pandas_profiling import st_profile_report
+
+from src.utils import load_data
+from src.search import spacy_preprocessor
+from src.search import spacy_similarity
+
+
+# Load a blank spaCy model
+# Used to access spaCy dtypes as inputs to hash_func in st.cache(...)
+spacy.blank('en')
+
+
+@st.cache(allow_output_mutation=True,
+          suppress_st_warning=True,
+          show_spinner=False)
+def load_model(model: str) -> spacy.language.Language:
+    """Load spaCy model.
+    """
+    return spacy.load(model)
 
 
 def main():
@@ -29,7 +52,10 @@ def main():
       - Performs AutoML using `TPOT`
       """
     )
-    
+
+    # Pretrained NLP model
+    model = 'en_core_web_md'
+    nlp = load_model(model)
 
 
 if __name__ == "__main__":
