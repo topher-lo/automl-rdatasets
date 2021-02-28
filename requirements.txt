@@ -1,0 +1,6 @@
+streamlit
+streamlit-pandas-profiling
+spacy
+numpy
+pandas
+wheel
