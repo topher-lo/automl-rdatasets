@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+    app:
+        restart: always
+        image: streamlit-rdatasets
+        build:
+            dockerfile: ./Dockerfile
+            context: .
+        volumes:
+          - .:/home/app/webapp
+        environment:
+            - PORT=${PORT}
+        ports:
+            - ${PORT}:${PORT}
