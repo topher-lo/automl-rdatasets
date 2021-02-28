@@ -2,5 +2,6 @@ streamlit
 streamlit-pandas-profiling
 spacy
 numpy
+numba
 pandas
 wheel

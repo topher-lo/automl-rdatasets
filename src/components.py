@@ -1,4 +1,4 @@
-"""spaCy custom components and custom extensions
+"""spaCy custom components and custom extensions.
 
 Custom Pipeline Components:
 - filter -- filter tokens by alphabetical characters, parts-of-speech tags,
