@@ -89,12 +89,36 @@ def main():
         docs = get_docs(rdatasets['Title'].tolist(), nlp)
 
     # Search bar
-    search = st.text_input('Search R datasets')
+    search = st.text_input('Find relevant R datasets')
     if not(search):
         st.stop()
 
     # Get matches
     matches = get_matches(docs, search, nlp=nlp)
+    cutoff_similarity = 0.5  # Cutoff similarity score
+    cutoff_num_matches = 10  # Cutoff number of matches
+    matches = pd.Series(matches)
+    # Get matches above cutoff
+    relevant_matches = (matches.loc[matches > cutoff_similarity]
+                               .nlargest(10)
+                               .index)
+    relevant_cols = ['Package', 'Item', 'Title', 'Rows', 'Cols']
+    rdatasets_matches = (rdatasets.loc[rdatasets.index.isin(relevant_matches),
+                                       relevant_cols]
+                                  .reindex(relevant_matches))
+    if len(rdatasets_matches) > 0:
+        st.table(rdatasets_matches)
+    else:
+        st.warning('No relevant datasets')
+        st.stop()
+
+    # Select dataset
+    selected_dataset_idx = st.selectbox('Select a dataset by its '
+                                        'index in the table above',
+                                        options=[None] + relevant_matches.tolist())
+    selected_dataset = rdatasets[rdatasets.index == selected_dataset_idx]
+    if not(selected_dataset_idx):
+        st.stop()
 
 
 if __name__ == "__main__":
