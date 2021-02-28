@@ -24,6 +24,28 @@ def load_model(model: str) -> spacy.language.Language:
     return spacy.load(model)
 
 
+@st.cache(hash_funcs={spacy.vocab.Vocab: id,
+                      spacy.lang.en.English: id},
+          allow_output_mutation=True,
+          show_spinner=False)
+def get_docs(*args, **kwargs):
+    """Returns list of processed spaCy Doc objects.
+    """
+    docs = spacy_preprocessor(*args, **kwargs)
+    return docs
+
+
+@st.cache(hash_funcs={spacy.tokens.doc.Doc: id,
+                      spacy.vocab.Vocab: id,
+                      spacy.lang.en.English: id},
+          allow_output_mutation=True,
+          show_spinner=False)
+def get_matches(*args, **kwargs):
+    """Returns list of cosine similarity scores.
+    """
+    return spacy_similarity(*args, **kwargs)
+
+
 def main():
     # Configures the default settings
     st.set_page_config(page_title='streamlit-rdatasets',
@@ -38,8 +60,8 @@ def main():
       1. Find relevant R datasets using the searchbar
       2. Select a R dataset
       3. Press the "Data profiling report" button to perform EDA
-      4. Select an outcome variable in the chosen dataset
-      5. Choose a supervised ML task to perform
+      4. From the sidebar: Select an outcome variable in the chosen dataset
+      5. From the sidebar: Choose a supervised ML task to perform
       (i.e. regression or classification)
       6. Press the "Run AutoML" button to perform AutoML and generate Python
       code for the best ML pipeline
@@ -56,6 +78,23 @@ def main():
     # Pretrained NLP model
     model = 'en_core_web_md'
     nlp = load_model(model)
+
+    # R datasets search bar
+    rdatasets = load_data('https://raw.githubusercontent.com/'
+                          'vincentarelbundock/Rdatasets/'
+                          'master/datasets.csv')
+
+    # Run spaCy processing pipeline on R datasets meta-data
+    with st.spinner('Processing R datasets table...'):
+        docs = get_docs(rdatasets['Title'].tolist(), nlp)
+
+    # Search bar
+    search = st.text_input('Search R datasets')
+    if not(search):
+        st.stop()
+
+    # Get matches
+    matches = get_matches(docs, search, nlp=nlp)
 
 
 if __name__ == "__main__":
