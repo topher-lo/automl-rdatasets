@@ -17,7 +17,7 @@ from typing import List
 from typing import Mapping
 from typing import Union
 
-from ..utils import intersect_dicts
+from .utils import intersect_dicts
 
 from spacy.language import Language
 from spacy.tokens import Doc
@@ -100,7 +100,7 @@ class FilteredTokensComponent:
                 # Append match to matches set
                 matches[span] = Match(span, token, span.vector.tolist())
             nested_filtered_matches.append(matches)
-        # Get tntersection of matches
+        # Get intersection of matches
         for i in range(len(nested_filtered_matches)):
             matches = nested_filtered_matches[i]
             if i == 0:
