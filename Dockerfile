@@ -13,4 +13,6 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 # copy project
 COPY . $MICRO_SERVICE
-CMD ["sh", "-c", "streamlit run --server.port $PORT app.py"] 
+# install pretrained spacy model
+RUN python -m spacy download en_core_web_md
+CMD ["sh", "-c", "streamlit run --server.port $PORT app.py"]
