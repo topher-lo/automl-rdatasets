@@ -47,12 +47,32 @@ def get_matches(*args, **kwargs):
     return spacy_similarity(*args, **kwargs)
 
 
+def sidebar():
+    st.sidebar.header('AutoML settings')
+
+    st.sidebar.header('Search options')
+    # Cutoff similarity score
+    cutoff_similarity = st.sidebar.number_input('Min cutoff for cosine'
+                                                ' similarity between query'
+                                                ' and R dataset description',
+                                                min_value=0.00,
+                                                value=0.50,
+                                                step=0.01)
+    # Maximum number of matches
+    max_num_matches = st.sidebar.number_input('Max number of'
+                                              ' matches shown',
+                                              min_value=1,
+                                              value=10,
+                                              step=1)
+    return {'cutoff_similarity': cutoff_similarity,
+            'max_num_matches': max_num_matches}
+
+
 def main():
     # Configures the default settings
     st.set_page_config(page_title='automl-rdatasets',
                        page_icon='🔎')
-    st.title('🔎🧙')
-    st.title('AutoML on R datasets')
+    st.title('🔎 AutoML on R datasets 🧙')
     st.subheader('MIT License')
     st.markdown(
       """
@@ -67,16 +87,11 @@ def main():
       (i.e. regression or classification)
       6. Press the "Run AutoML" button to perform AutoML and generate Python
       code for the best ML pipeline
-
-      🦾 Tech stack:
-      - Uses `spaCy`'s pre-trained Word2Vec word embeddings
-      and cosine similarity
-      to perform contextual search
-      - Generates the data profiling report using `pandas-profiling`
-      - Generates missing value plots using `missingno`
-      - Performs AutoML using `TPOT`
       """
     )
+
+    # Sidebar
+    options = sidebar()
 
     # Pretrained NLP model
     model = 'en_core_web_md'
@@ -92,18 +107,17 @@ def main():
         docs = get_docs(rdatasets['Title'].tolist(), nlp)
 
     # Search bar
-    search = st.text_input('Find relevant R datasets')
+    search = st.text_input('Find relevant R datasets ordered by'
+                           ' cosine similarity')
     if not(search):
         st.stop()
 
     # Get matches
     matches = get_matches(docs, search, nlp=nlp)
-    cutoff_similarity = 0.5  # Cutoff similarity score
-    cutoff_num_matches = 10  # Cutoff number of matches
     matches = pd.Series(matches)
     # Get matches above cutoff
-    relevant_matches = (matches.loc[matches > cutoff_similarity]
-                               .nlargest(10)
+    relevant_matches = (matches.loc[matches > options.get('cutoff_similarity')]
+                               .nlargest(options.get('max_num_matches'))
                                .index)
     relevant_cols = ['Package', 'Item', 'Title', 'Rows', 'Cols']
     rdatasets_matches = (rdatasets.loc[rdatasets.index.isin(relevant_matches),
@@ -118,7 +132,8 @@ def main():
     # Select dataset
     selected_dataset_idx = st.selectbox('Select a dataset by its '
                                         'index in the table above',
-                                        options=[None] + relevant_matches.tolist())
+                                        options=[None] +
+                                        relevant_matches.tolist())
     selected_dataset = rdatasets[rdatasets.index == selected_dataset_idx]
     if not(selected_dataset_idx):
         st.stop()
