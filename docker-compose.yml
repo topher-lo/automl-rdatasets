@@ -2,7 +2,7 @@ version: "3.8"
 services:
     app:
         restart: always
-        image: streamlit-rdatasets
+        image: automl-rdatasets
         build:
             dockerfile: ./Dockerfile
             context: .

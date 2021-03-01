@@ -1,4 +1,4 @@
-"""Module with utility functions used in streamlit-rdatasets
+"""Module with utility functions used in automl-rdatasets
 
 Functions:
 - load_data(...) -- Loads data located at a url string and returns data

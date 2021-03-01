@@ -49,7 +49,7 @@ def get_matches(*args, **kwargs):
 
 def main():
     # Configures the default settings
-    st.set_page_config(page_title='streamlit-rdatasets',
+    st.set_page_config(page_title='automl-rdatasets',
                        page_icon='🔎')
     st.title('🔎🧙')
     st.title('AutoML on R datasets')
