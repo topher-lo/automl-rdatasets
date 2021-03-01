@@ -2,7 +2,7 @@ name: Push Container to Heroku
 
 on: 
   push:
-    branches: [ prod ]
+    branches: main
     paths-ignore:
       - 'README.md'
       - 'CONTRIBUTING.md'
