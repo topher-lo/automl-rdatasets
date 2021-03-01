@@ -1,10 +1,11 @@
 # automl-rdatasets
 🔎🧙 Contextual search and autoML on R datasets using spacy and tpot. Served as a Streamlit web app.
+Inspired by [Traingenerator](https://github.com/jrieke/traingenerator).
 
 ## 🎬 Live Demo
 You can find the live demo [here](https://automl-rdatasets.herokuapp.com/).
 ### Using the app:
-1. Find relevant R datasets using the searchbar
+1. Find relevant R datasets using the search bar
 2. Select a R dataset
 3. Select an outcome variable and supervised ML task (regression or classification) to perform 
 4. Press the "Run AutoML" button to perform AutoML and generate Python code for the best ML pipeline!
