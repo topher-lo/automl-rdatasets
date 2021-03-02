@@ -6,6 +6,9 @@ import pandas as pd
 from typing import List
 from typing import Union
 from typing import Mapping
+from tpot import TPOTClassifier
+
+from sklearn.model_selection import train_test_split
 
 
 def _factor_wrangler(
@@ -59,7 +62,7 @@ def clean_data(
     return data
 
 
-def encode_data(data: pd.DataFrame, outcome_col: str) -> pd.DataFrame:
+def encode_data(data: pd.DataFrame) -> pd.DataFrame:
     """Transforms columns with unordered `category` dtype
     using `pd.get_dummies`. Transforms columns with ordered `category`
     dtype using `series.cat.codes`.
@@ -71,6 +74,38 @@ def encode_data(data: pd.DataFrame, outcome_col: str) -> pd.DataFrame:
         data = pd.get_dummies(data, columns=unordered, dummy_na=True)
         data.iloc[:, ordered] = data.iloc[:, ordered].cat.codes
     return data
+
+
+def run_automl(data: pd.DataFrame,
+               outcome_col: str,
+               ml_task: str,
+               train_size: float,
+               test_size: float,
+               *args, **kwargs) -> str:
+    """Runs AutoML using TPOT. Returns best pipeline found by TPOT as a string
+    of Python code.
+    """
+    # Features and outcome columns
+    features = [col for col in data.columns if outcome_col not in col]
+    outcome = [col for col in data.columns if outcome_col in col]
+    if len(outcome) == 1:
+        outcome = outcome[0]
+    # Split dataset
+    X_train, X_test, y_train, y_test = train_test_split(data.iloc[:, features],
+                                                        data.iloc[:, outcome],
+                                                        test_size,
+                                                        train_size)
+    # Optimise pipeline
+    if ml_task == 'Classification':
+        tpot = TPOTClassifier(**kwargs)
+        tpot.fit(X_train, y_train)
+    else:
+        tpot = TPOTRegressor(**kwargs)
+        tpot.fit(X_train, y_train)
+    # Export Python code for best pipeline found
+    pipeline_code = tpot.export()
+    return pipeline_code
+
 
 
 if __name__ == "__main__":

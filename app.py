@@ -57,6 +57,63 @@ def sidebar(data=None):
     ml_task = st.sidebar.selectbox('Is AutoML being used for a supervised'
                                    ' classification or regression problem?',
                                    ('Classification', 'Regression'))
+    scoring = st.sidebar.selectbox('Which metric is used to evaluate models?',
+                                   ('Accuracy rate',
+                                    'Area under ROC curve',
+                                    'Mean squared error',
+                                    'F1 score'))
+    scoring_name_code = {
+        'Accuracy rate': 'accuracy',
+        'Area under ROC curve': 'roc_auc',
+        'Mean squared error': 'neg_mean_squared_error',
+        'F1 score': 'f1'
+    }
+    scoring_code = scoring_name_code[scoring]
+    test_size = st.sidebar.slider('What percentage of the data'
+                                  ' is in the test set?',
+                                  min_value=0.0,
+                                  max_value=1.0,
+                                  value=0.25,
+                                  step=0.01)
+    train_size = st.sidebar.slider('What percentage of the data'
+                                   ' is in the training set?',
+                                   min_value=0.0,
+                                   max_value=1.0,
+                                   value=0.75,
+                                   step=0.01)
+    generations = st.sidebar.slider('How many iterations should the'
+                                    ' pipeline optimisation process'
+                                    ' run for?',
+                                    min_value=1,
+                                    max_value=20,
+                                    value=5,
+                                    step=1)
+    max_time = st.sidebar.slider('Maximum running time'
+                                 ' (in minutes) to'
+                                 ' optimise pipeline',
+                                 min_value=1,
+                                 max_value=20,
+                                 value=5,
+                                 step=1)
+    max_eval_time = st.sidebar.slider('Maximum running time to'
+                                      ' (in minutes) to evaluate each pipeline',
+                                      min_value=1,
+                                      max_value=10,
+                                      value=2,
+                                      step=1)
+    pop_size = st.sidebar.number_input('How many observations should be'
+                                       ' retained in the genetic programming'
+                                       ' population for each iteration?',
+                                       min_value=0,
+                                       value=50,
+                                       step=1)
+    automl_config = {
+        'generations': generations,
+        'population_size': pop_size,
+        'scoring': scoring_code,
+        'max_time_mins': max_time,
+        'max_eval_time_mins': max_eval_time
+    }
     # Contextual search
     st.sidebar.header('Search options')
     # Cutoff similarity score
@@ -73,6 +130,9 @@ def sidebar(data=None):
                                               value=5,
                                               step=1)
     return {'ml_task': ml_task,
+            'test_size': test_size,
+            'train_size': train_size,
+            'automl_config': automl_config,
             'cutoff_similarity': cutoff_similarity,
             'max_num_matches': max_num_matches}
 
@@ -277,8 +337,24 @@ def main():
         # Encoded data
         encoded_data = encode_data(cleaned_data)
         # Model data
-        automl_code = run_automl(encoded_data, outcome)
+        ml_task = options.get('ml_task')
+        test_size = options.get('test_size')
+        train_size = options.get('train_size')
+        automl_config = options.get('automl_config')
+        automl_code = run_automl(encoded_data,
+                                 outcome,
+                                 ml_task,
+                                 train_size,
+                                 test_size,
+                                 **automl_config)
         # Display code for best ML pipeline found
+        st.markdown(
+            """
+            ```python
+            {}
+            ```
+            """.format(automl_code)
+        )
 
 
 if __name__ == "__main__":

@@ -1,8 +1,10 @@
 streamlit
 streamlit-pandas-profiling
+scikit-learn
 spacy
 numpy
 numba
 missingno
+tpot
 pandas
 wheel

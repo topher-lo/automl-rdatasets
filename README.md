@@ -1,6 +1,9 @@
 # automl-rdatasets
 🔎🧙 Contextual search and autoML on R datasets using spacy and tpot. Served as a Streamlit web app.
-Inspired by [Traingenerator](https://github.com/jrieke/traingenerator).
+Find inspiration (and starter code) for your next ML project.
+Search for a dataset in your domain of interest from R's extensive 
+[collection of data](https://vincentarelbundock.github.io/Rdatasets/index.html).
+Run AutoML to find and generate Python code for an optimised ML pipeline!
 
 ## 🎬 Live Demo
 You can find the live demo [here](https://automl-rdatasets.herokuapp.com/).
@@ -8,7 +11,7 @@ You can find the live demo [here](https://automl-rdatasets.herokuapp.com/).
 1. Find relevant R datasets using the search bar
 2. Select a R dataset
 3. Select an outcome variable and supervised ML task (regression or classification) to perform 
-4. Press the "Run AutoML" button to perform AutoML and generate Python code for the best ML pipeline!
+4. Press the "Run AutoML" button to perform AutoML and generate Python code for the best ML pipeline
 
 ## Install
 automl-rdatasets has been tested on Python 3.8 and depends on the following packages:
@@ -58,6 +61,7 @@ Otherwise, if you are using docker, the web app will be available at whichever p
 - Generates the data profiling report using `pandas-profiling`
 - Generates missing value plots using `missingno`
 - Performs AutoML using `TPOT`
+- UI inspired by [Traingenerator](https://github.com/jrieke/traingenerator)
 
 ## Getting in touch
 If you are having a problem with this demo, please raise a GitHub issue. For anything else, you can reach me at: lochristopherhy@gmail.com
