@@ -1,6 +1,7 @@
 import streamlit as st
 import spacy
 import pandas as pd
+import numpy as np
 import missingno as msno
 
 from pandas_profiling import ProfileReport
@@ -47,24 +48,48 @@ def get_matches(*args, **kwargs):
     return spacy_similarity(*args, **kwargs)
 
 
-def sidebar():
+def sidebar(data=None):
+    # AutoML
     st.sidebar.header('AutoML settings')
-
+    # Select missing value strategy
+    na_strategy = st.sidebar.selectbox('How should missing values be handled?',
+                                       ('Missing indicator',
+                                        'MICE',
+                                        'Complete case'))
+    # Choose supervised ML task type
+    ml_task = st.sidebar.selectbox('Is AutoML being used for a supervised'
+                                   ' classification or regression problem?',
+                                   ('Classification', 'Regression'))
+    # Select categorical variables
+    if data:
+        columns = data.columns.tolist()
+    else:
+        columns = []
+    is_factor = st.sidebar.multiselect('Are there any categorical variables?',
+                                       options=columns)
+    # Select outcome variable
+    outcome = st.sidebar.selectbox('What is the outcome variable?',
+                                   options=columns)
+    # Contextual search
     st.sidebar.header('Search options')
     # Cutoff similarity score
-    cutoff_similarity = st.sidebar.number_input('Min cutoff for cosine'
+    cutoff_similarity = st.sidebar.number_input('Minimum cutoff for cosine'
                                                 ' similarity between query'
                                                 ' and R dataset description',
                                                 min_value=0.00,
                                                 value=0.50,
                                                 step=0.01)
     # Maximum number of matches
-    max_num_matches = st.sidebar.number_input('Max number of'
+    max_num_matches = st.sidebar.number_input('Maximum number of'
                                               ' matches shown',
                                               min_value=1,
                                               value=10,
                                               step=1)
-    return {'cutoff_similarity': cutoff_similarity,
+    return {'na_strategy': na_strategy,
+            'ml_task': ml_task,
+            'is_factor': is_factor,
+            'outcome': outcome,
+            'cutoff_similarity': cutoff_similarity,
             'max_num_matches': max_num_matches}
 
 
@@ -91,7 +116,8 @@ def main():
     )
 
     # Sidebar
-    options = sidebar()
+    data = None
+    options = sidebar(data)
 
     # Pretrained NLP model
     model = 'en_core_web_md'
@@ -143,12 +169,16 @@ def main():
         url = selected_dataset['CSV'].tolist()[0]
         documentation = selected_dataset['Doc'].tolist()[0]
         data = load_data(url=url, index_col=0).reset_index(drop=True)
-        # Reset index
         st.info('Data loaded with success!')
         st.success(f'Documentation found [here]({documentation}).')
+        st.write('---')
+        # Data head and tail
+        title = selected_dataset.at[selected_dataset_idx, 'Title']
+        st.subheader(title)
+        st.text('First and last 5 rows:')
+        st.table(data.iloc[np.r_[0:4, -4:0]])
 
     # Column containers for buttons
-    st.write('---')
     col1, col2, col3 = st.beta_columns(3)
     # Data profiling
     if col1.button('🔬 Data profiling report'):
@@ -168,7 +198,18 @@ def main():
             st.pyplot(fig3)
     # Run data workflow
     if col3.button('✨ Run AutoML!'):
-        pass
+        cat_variables = options.get('is_factor')
+        if cat_variables:
+            num_cat = len(cat_variables)
+            st.info(f'Since you specified {num_cat} categorical variables,'
+                    ' please answer the following questions:')
+            for cat in cat_variables:
+                st.markdown(cat)
+                st.radio('Is the variable ordered?', ('Yes', 'No'))
+                st.multiselect('What are the variable\'s categories*?')
+                st.text('Note 1. If the ')
+                st.text('Note 2. If the variable is ordered, please select'
+                        ' each category in ascending order from left to right.')
 
 
 if __name__ == "__main__":
