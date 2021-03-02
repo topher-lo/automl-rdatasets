@@ -11,6 +11,7 @@ from src.utils import load_data
 from src.search import spacy_preprocessor
 from src.search import spacy_similarity
 from src.automl import clean_data
+from src.automl import encode_data
 
 
 # Load a blank spaCy model
@@ -80,6 +81,11 @@ def main():
     # Configures the default settings
     st.set_page_config(page_title='automl-rdatasets',
                        page_icon='🔎')
+
+    # Sidebar
+    options = sidebar()
+
+    # Title
     st.title('🔎 AutoML on R datasets 🧙')
     st.subheader('MIT License')
     st.markdown(
@@ -91,15 +97,13 @@ def main():
       3. Press the "Data profiling report" button or "Missing value plots"
       to perform EDA
       4. Select an outcome variable in the chosen dataset
-      5. Choose a supervised ML task to perform
+      5. From the sidebar, choose a supervised ML task to perform
       (i.e. regression or classification)
       6. Press the "Run AutoML" button to perform AutoML and generate Python
       code for the best ML pipeline
       """
     )
-
-    # Sidebar
-    options = sidebar()
+    st.write('')
 
     # Pretrained NLP model
     model = 'en_core_web_md'
@@ -117,6 +121,7 @@ def main():
     # Search bar
     search = st.text_input('Find relevant R datasets ordered by'
                            ' cosine similarity')
+    st.write('')
     if not(search):
         st.stop()
 
@@ -151,14 +156,39 @@ def main():
         url = selected_dataset['CSV'].tolist()[0]
         documentation = selected_dataset['Doc'].tolist()[0]
         data = load_data(url=url, index_col=0).reset_index(drop=True)
-        st.success('Data loaded with success!')
-        st.info(f'Documentation found [here]({documentation}).')
-        st.write('---')
+        col1, col2 = st.beta_columns(2)
+        col1.success('Dataset loaded with success!')
+        col2.info(f'Documentation found [here]({documentation}).')
         # Data head and tail
         title = selected_dataset.at[selected_dataset_idx, 'Title']
         st.subheader(title)
         st.text('First and last 5 rows:')
         st.dataframe(data.iloc[np.r_[0:4, -4:0]])
+        # Model specs
+        st.write('---')  # Divider
+        st.header('Specify your model')
+        st.write('')  # Blank line
+        with st.beta_expander('View instructions'):
+            st.markdown(
+                """
+                #### Note 1.\n
+                `automl-rdatasets` automatically converts textual columns
+                into unordered categorical variables.
+
+                #### Note 2.\n
+                You **do not** have to specify the categorical variables if the
+                following conditions are met:\n
+                1. Each column with `category` dtype contains only strings\*
+                or only numeric values\*
+                3. If the categorical variable is ordered, the variable's order
+                follows the alphanumeric order of the column's values
+
+                #### Note 3.\n
+                *`automl-rdatasets` accepts missing values recognised
+                by `pandas`.
+                """
+            )
+        st.write('')  # Blank line
         st.write('')  # Blank line
         # Select categorical variables
         cat_variables = st.multiselect('Are there any categorical variables?',
@@ -173,20 +203,27 @@ def main():
         if cat_variables:
             st.write('---')
             num_cat = len(cat_variables)
-            st.info(f'Since you specified {num_cat} categorical variables,'
-                    ' please answer the following questions:')
-            st.markdown(
-                """
-                #### Note 1.\n
-                If the variable is ordered, please select all valid* categories
-                in ascending order from left to right.
+            st.header('Categorical variables')
+            with st.beta_expander('View instructions'):
+                st.markdown(
+                    """
+                    #### Note 1.\n
+                    Since you declared 1 or more categorical variables,
+                    `automl-rdatasets` needs to know:\n
+                    1. Whether the variable is unordered or ordered
+                    2. The variable's categories
+                    3. (If ordered) the categories' order
 
-                #### Note 2.\n
-                *Any values **not** included in the "categories" widget will
-                be considered as a missing value, which is represented as
-                `pd.NA` in the dataframe.
-                """
-            )
+                    #### Note 2.\n
+                    If the variable is ordered, please select all valid*
+                    categories in ascending order from left to right.
+
+                    #### Note 3.\n
+                    *Any values **not** included in the "categories" widget
+                    will be considered as a missing value, which is
+                    represented as `pd.NA` in the dataframe.
+                    """
+                )
             for i in range(len(cat_variables)):
                 st.write('')  # Insert blank line
                 cat = cat_variables[i]
@@ -195,15 +232,16 @@ def main():
                                           ('Yes', 'No'),
                                           index=1,
                                           key=cat)
-                cats = st.multiselect('What are the variable\'s categories?',
+                cats = st.multiselect('What are this variable\'s categories?',
                                       data.loc[:, cat]
                                           .unique(),
                                       key=cat)
                 cats_config[cat] = (is_cat_ordered, cats)
-                st.write('')  # Insert blank line
 
     # Column containers for buttons
-    st.write('---')
+    st.write('---')  # Divider
+    st.header('Run analysis')
+    st.write('')  # Blank line
     col1, col2, col3 = st.beta_columns(3)
     # Buttons
     run_profiling = col1.button('🔬 Data profiling report')
