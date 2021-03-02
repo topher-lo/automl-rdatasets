@@ -11,6 +11,7 @@ from typing import Mapping
 def _factor_wrangler(
     data: pd.DataFrame,
     is_factor: Union[None, List[str]],
+    is_ordered: Union[None, List[str]],
     categories: Union[None, Mapping[str, List[Union[str, int, float]]]] = None,
     str_to_cat: bool = True,
 ) -> pd.DataFrame:

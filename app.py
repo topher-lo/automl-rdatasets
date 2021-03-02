@@ -1,3 +1,4 @@
+import collections
 import streamlit as st
 import spacy
 import pandas as pd
@@ -60,16 +61,6 @@ def sidebar(data=None):
     ml_task = st.sidebar.selectbox('Is AutoML being used for a supervised'
                                    ' classification or regression problem?',
                                    ('Classification', 'Regression'))
-    # Select categorical variables
-    if data:
-        columns = data.columns.tolist()
-    else:
-        columns = []
-    is_factor = st.sidebar.multiselect('Are there any categorical variables?',
-                                       options=columns)
-    # Select outcome variable
-    outcome = st.sidebar.selectbox('What is the outcome variable?',
-                                   options=columns)
     # Contextual search
     st.sidebar.header('Search options')
     # Cutoff similarity score
@@ -83,12 +74,10 @@ def sidebar(data=None):
     max_num_matches = st.sidebar.number_input('Maximum number of'
                                               ' matches shown',
                                               min_value=1,
-                                              value=10,
+                                              value=5,
                                               step=1)
     return {'na_strategy': na_strategy,
             'ml_task': ml_task,
-            'is_factor': is_factor,
-            'outcome': outcome,
             'cutoff_similarity': cutoff_similarity,
             'max_num_matches': max_num_matches}
 
@@ -116,8 +105,7 @@ def main():
     )
 
     # Sidebar
-    data = None
-    options = sidebar(data)
+    options = sidebar()
 
     # Pretrained NLP model
     model = 'en_core_web_md'
@@ -169,23 +157,71 @@ def main():
         url = selected_dataset['CSV'].tolist()[0]
         documentation = selected_dataset['Doc'].tolist()[0]
         data = load_data(url=url, index_col=0).reset_index(drop=True)
-        st.info('Data loaded with success!')
-        st.success(f'Documentation found [here]({documentation}).')
+        st.success('Data loaded with success!')
+        st.info(f'Documentation found [here]({documentation}).')
         st.write('---')
         # Data head and tail
         title = selected_dataset.at[selected_dataset_idx, 'Title']
         st.subheader(title)
         st.text('First and last 5 rows:')
-        st.table(data.iloc[np.r_[0:4, -4:0]])
+        st.dataframe(data.iloc[np.r_[0:4, -4:0]])
+        st.write('')  # Blank line
+        # Select categorical variables
+        cat_variables = st.multiselect('Are there any categorical variables?',
+                                       options=data.columns)
+        # Select outcome variable
+        outcome = st.selectbox('What is the outcome variable?',
+                               options=data.columns)
+
+        # Set categorical configs
+        cat_configs = {}
+        # Categorical variables config
+        if cat_variables:
+            st.write('---')
+            num_cat = len(cat_variables)
+            st.info(f'Since you specified {num_cat} categorical variables,'
+                    ' please answer the following questions:')
+            st.markdown(
+                """
+                #### Note 1.\n
+                If the variable is ordered, please select all valid* categories
+                in ascending order from left to right.
+
+                #### Note 2.\n
+                *Any values **not** included in the "categories" widget will
+                be considered as a missing value, which is represented as
+                `pd.NA` in the dataframe.
+                """
+            )
+            for i in range(len(cat_variables)):
+                st.write('')  # Insert blank line
+                cat = cat_variables[i]
+                st.subheader('{}. {}'.format(i+1, cat))
+                is_cat_ordered = st.radio('Is this variable ordered?',
+                                          ('Yes', 'No'),
+                                          index=1,
+                                          key=cat)
+                cats = st.multiselect('What are the variable\'s categories?',
+                                      data.loc[:, cat]
+                                          .unique(),
+                                      key=cat)
+                cat_configs[cat] = (is_cat_ordered, cats)
+                st.write('')  # Insert blank line
 
     # Column containers for buttons
+    st.write('---')
     col1, col2, col3 = st.beta_columns(3)
+    # Buttons
+    run_profiling = col1.button('🔬 Data profiling report')
+    run_na_report = col2.button('🔎 Missing value plots')
+    run_automl = col3.button('✨ Run AutoML!')
+    st.write('---')
     # Data profiling
-    if col1.button('🔬 Data profiling report'):
+    if run_profiling:
         profile_report = ProfileReport(data, explorative=True)
         st_profile_report(profile_report)
     # Missing value analysis
-    if col2.button('🔎 Missing value plots'):
+    if run_na_report:
         # Check if there are any missing values
         if pd.notna(data).all().all():
             st.warning('No missing values in dataset')
@@ -197,19 +233,9 @@ def main():
             fig3 = msno.dendrogram(data).get_figure()
             st.pyplot(fig3)
     # Run data workflow
-    if col3.button('✨ Run AutoML!'):
-        cat_variables = options.get('is_factor')
-        if cat_variables:
-            num_cat = len(cat_variables)
-            st.info(f'Since you specified {num_cat} categorical variables,'
-                    ' please answer the following questions:')
-            for cat in cat_variables:
-                st.markdown(cat)
-                st.radio('Is the variable ordered?', ('Yes', 'No'))
-                st.multiselect('What are the variable\'s categories*?')
-                st.text('Note 1. If the ')
-                st.text('Note 2. If the variable is ordered, please select'
-                        ' each category in ascending order from left to right.')
+    # Initialise categorical variables arguments
+    if run_automl:
+        pass
 
 
 if __name__ == "__main__":
