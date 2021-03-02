@@ -52,11 +52,6 @@ def get_matches(*args, **kwargs):
 def sidebar(data=None):
     # AutoML
     st.sidebar.header('AutoML settings')
-    # Select missing value strategy
-    na_strategy = st.sidebar.selectbox('How should missing values be handled?',
-                                       ('Missing indicator',
-                                        'MICE',
-                                        'Complete case'))
     # Choose supervised ML task type
     ml_task = st.sidebar.selectbox('Is AutoML being used for a supervised'
                                    ' classification or regression problem?',
@@ -76,8 +71,7 @@ def sidebar(data=None):
                                               min_value=1,
                                               value=5,
                                               step=1)
-    return {'na_strategy': na_strategy,
-            'ml_task': ml_task,
+    return {'ml_task': ml_task,
             'cutoff_similarity': cutoff_similarity,
             'max_num_matches': max_num_matches}
 
@@ -235,7 +229,16 @@ def main():
     # Run data workflow
     # Initialise categorical variables arguments
     if run_automl:
-        pass
+        # Clean data
+        cleaned_data = clean_data(data,
+                                  is_factor,
+                                  is_ordered,
+                                  categories)
+        # Encoded data
+        encoded_data = encode_data(cleaned_data)
+        # Model data
+        automl_code = run_automl(encoded_data, outcome)
+        # Display code for best ML pipeline found
 
 
 if __name__ == "__main__":
