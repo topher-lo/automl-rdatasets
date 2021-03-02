@@ -31,6 +31,16 @@ def _factor_wrangler(
         for col in cat_cols:
             data.loc[:, col] = (data.loc[:, col]
                                     .astype('category'))
+    # Set categories
+    for col, cats in categories.items():
+        data.loc[:, col] = (data.loc[:, col]
+                                .cat
+                                .set_categories(cats))
+    # Set is_ordered
+    for cat in is_ordered:
+        data.loc[:, col] = (data.loc[:, col]
+                                .cat
+                                .as_ordered())
     return data
 
 

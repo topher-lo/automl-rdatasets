@@ -1,4 +1,3 @@
-import collections
 import streamlit as st
 import spacy
 import pandas as pd
@@ -11,6 +10,7 @@ from streamlit_pandas_profiling import st_profile_report
 from src.utils import load_data
 from src.search import spacy_preprocessor
 from src.search import spacy_similarity
+from src.automl import clean_data
 
 
 # Load a blank spaCy model
@@ -168,7 +168,7 @@ def main():
                                options=data.columns)
 
         # Set categorical configs
-        cat_configs = {}
+        cats_config = {}
         # Categorical variables config
         if cat_variables:
             st.write('---')
@@ -199,7 +199,7 @@ def main():
                                       data.loc[:, cat]
                                           .unique(),
                                       key=cat)
-                cat_configs[cat] = (is_cat_ordered, cats)
+                cats_config[cat] = (is_cat_ordered, cats)
                 st.write('')  # Insert blank line
 
     # Column containers for buttons
@@ -229,11 +229,13 @@ def main():
     # Run data workflow
     # Initialise categorical variables arguments
     if run_automl:
+        is_ordered = [k for k, v in cats_config.items() if v[0] == 'Yes']
+        categories = {k: v[1] for k, v in cats_config.items()}
         # Clean data
         cleaned_data = clean_data(data,
-                                  is_factor,
-                                  is_ordered,
-                                  categories)
+                                  is_factor=cat_variables,
+                                  is_ordered=is_ordered,
+                                  categories=categories)
         # Encoded data
         encoded_data = encode_data(cleaned_data)
         # Model data
