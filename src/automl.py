@@ -59,5 +59,19 @@ def clean_data(
     return data
 
 
+def encode_data(data: pd.DataFrame, outcome_col: str) -> pd.DataFrame:
+    """Transforms columns with unordered `category` dtype
+    using `pd.get_dummies`. Transforms columns with ordered `category`
+    dtype using `series.cat.codes`.
+    """
+    cat_cols = (data.select_dtypes(include=['category']))
+    unordered = [col.name for col in cat_cols if not(col.cat.ordered)]
+    ordered = [col.name for col in cat_cols if col not in unordered]
+    if cat_cols.any():
+        data = pd.get_dummies(data, columns=unordered, dummy_na=True)
+        data.iloc[:, ordered] = data.iloc[:, ordered].cat.codes
+    return data
+
+
 if __name__ == "__main__":
     pass
