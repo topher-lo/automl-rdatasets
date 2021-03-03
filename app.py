@@ -54,6 +54,8 @@ def get_matches(*args, **kwargs):
 def sidebar(data=None):
     # AutoML
     st.sidebar.header('AutoML settings')
+    st.sidebar.info('TPOT API reference found'
+                    ' [here](http://epistasislab.github.io/tpot/api/)')
     # Choose supervised ML task type
     ml_task = st.sidebar.selectbox('Is AutoML being used for a supervised'
                                    ' classification or regression problem?',
@@ -341,14 +343,15 @@ def main():
         test_size = options.get('test_size')
         train_size = options.get('train_size')
         automl_config = options.get('automl_config')
-        automl_code = run_automl(encoded_data,
-                                 outcome,
-                                 ml_task,
-                                 train_size,
-                                 test_size,
-                                 **automl_config)
+        with st.spinner('Finding optimal pipeline...'):
+            automl_code = run_automl(encoded_data,
+                                     outcome,
+                                     ml_task,
+                                     train_size,
+                                     test_size,
+                                     **automl_config)
         # Display code for best ML pipeline found
-        st.balloons()  # Celebrate with balloons
+        st.success('Done!')
         st.markdown(
             """
             ```python
