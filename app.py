@@ -86,21 +86,21 @@ def sidebar(data=None):
                                     ' pipeline optimisation process'
                                     ' run for?',
                                     min_value=1,
-                                    max_value=20,
+                                    max_value=10,
                                     value=5,
                                     step=1)
     max_time = st.sidebar.slider('Maximum running time'
                                  ' (in minutes) to'
                                  ' optimise pipeline',
                                  min_value=1,
-                                 max_value=20,
-                                 value=5,
+                                 max_value=5,
+                                 value=2,
                                  step=1)
     max_eval_time = st.sidebar.slider('Maximum running time to'
                                       ' (in minutes) to evaluate each pipeline',
                                       min_value=1,
-                                      max_value=10,
-                                      value=2,
+                                      max_value=2,
+                                      value=1,
                                       step=1)
     pop_size = st.sidebar.number_input('How many observations should be'
                                        ' retained in the genetic programming'
