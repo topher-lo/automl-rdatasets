@@ -1,4 +1,8 @@
 # automl-rdatasets
+[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
+[![Heroku Up](https://heroku-shields.herokuapp.com/traingenerator)](https://automl-rdatasets.herokuapp.com/)
+[![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/)
+
 🔎🧙 Contextual search and autoML on R datasets using spacy and tpot. Served as a Streamlit web app.
 Find inspiration (and starter code) for your next ML project.
 Search for a dataset in your domain of interest from R's extensive 
