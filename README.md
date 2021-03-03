@@ -5,6 +5,8 @@ Search for a dataset in your domain of interest from R's extensive
 [collection of data](https://vincentarelbundock.github.io/Rdatasets/index.html).
 Run AutoML to find and generate Python code for an optimised ML pipeline!
 
+![automl-rdatasets demo](https://github.com/topher-lo/automl-rdatasets/blob/main/media/recording.gif)
+
 ## 🎬 Live Demo
 You can find the live demo [here](https://automl-rdatasets.herokuapp.com/).
 ### Using the app:
