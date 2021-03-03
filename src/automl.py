@@ -2,13 +2,27 @@
 """
 
 import pandas as pd
+import streamlit as st
 
 from typing import List
 from typing import Union
 from typing import Mapping
 from tpot import TPOTClassifier
+from tpot import TPOTRegressor
 
 from sklearn.model_selection import train_test_split
+
+from pandas.api.types import is_categorical_dtype
+
+
+def _obj_wrangler(data: pd.DataFrame) -> pd.DataFrame:
+    """Converts columns with `object` dtype to `StringDtype`.
+    """
+    obj_cols = (data.select_dtypes(include=['object'])
+                    .columns)
+    data.loc[:, obj_cols] = (data.loc[:, obj_cols]
+                                 .astype('string'))
+    return data
 
 
 def _factor_wrangler(
@@ -35,15 +49,17 @@ def _factor_wrangler(
             data.loc[:, col] = (data.loc[:, col]
                                     .astype('category'))
     # Set categories
-    for col, cats in categories.items():
-        data.loc[:, col] = (data.loc[:, col]
-                                .cat
-                                .set_categories(cats))
+    if categories:
+        for col, cats in categories.items():
+            data.loc[:, col] = (data.loc[:, col]
+                                    .cat
+                                    .set_categories(cats))
     # Set is_ordered
-    for cat in is_ordered:
-        data.loc[:, col] = (data.loc[:, col]
-                                .cat
-                                .as_ordered())
+    if is_ordered:
+        for cat in is_ordered:
+            data.loc[:, col] = (data.loc[:, col]
+                                    .cat
+                                    .as_ordered())
     return data
 
 
@@ -56,9 +72,15 @@ def clean_data(
 ) -> pd.DataFrame:
     """Data preprocessing pipeline.
     Runs the following data wranglers on `data`:
-    1. _factor_wrangler
+    1. _obj_wrangler
+    2. _factor_wrangler
     """
-    data = (data.pipe(_factor_wrangler, is_factor, categories, str_to_cat))
+    data = (data.pipe(_obj_wrangler)
+                .pipe(_factor_wrangler,
+                      is_factor,
+                      is_ordered,
+                      categories,
+                      str_to_cat))
     return data
 
 
@@ -67,11 +89,17 @@ def encode_data(data: pd.DataFrame) -> pd.DataFrame:
     using `pd.get_dummies`. Transforms columns with ordered `category`
     dtype using `series.cat.codes`.
     """
-    cat_cols = (data.select_dtypes(include=['category']))
-    unordered = [col.name for col in cat_cols if not(col.cat.ordered)]
-    ordered = [col.name for col in cat_cols if col not in unordered]
-    if cat_cols.any():
+    unordered_mask = data.apply(lambda col: is_categorical_dtype(col) and
+                                not(col.cat.ordered))
+    ordered_mask = data.apply(lambda col: is_categorical_dtype(col) and
+                              col.cat.ordered)
+    unordered = (data.loc[:, unordered_mask]
+                     .columns)
+    ordered = (data.loc[:, ordered_mask]
+                   .columns)
+    if unordered.any():
         data = pd.get_dummies(data, columns=unordered, dummy_na=True)
+    if ordered.any():
         data.iloc[:, ordered] = data.iloc[:, ordered].cat.codes
     return data
 
@@ -85,16 +113,24 @@ def run_automl(data: pd.DataFrame,
     """Runs AutoML using TPOT. Returns best pipeline found by TPOT as a string
     of Python code.
     """
-    # Features and outcome columns
-    features = [col for col in data.columns if outcome_col not in col]
-    outcome = [col for col in data.columns if outcome_col in col]
+    # Outcome
+    # Select outcome col (and its dummies if any)
+    outcome_cols = [outcome_col] + (data.columns
+                                        .str
+                                        .match(f'{outcome_col}_')
+                                        .tolist())
+    # Filter only valid columns
+    # with potentially not-found cols (i.e. dummies)
+    outcome = data.loc[:, data.columns.intersection(outcome_cols)]
+    # Features
+    features = data.loc[:, ~data.columns.isin(outcome.columns)]
     if len(outcome) == 1:
         outcome = outcome[0]
     # Split dataset
-    X_train, X_test, y_train, y_test = train_test_split(data.iloc[:, features],
-                                                        data.iloc[:, outcome],
-                                                        test_size,
-                                                        train_size)
+    X_train, X_test, y_train, y_test = train_test_split(features,
+                                                        outcome,
+                                                        test_size=test_size,
+                                                        train_size=train_size)
     # Optimise pipeline
     if ml_task == 'Classification':
         tpot = TPOTClassifier(**kwargs)

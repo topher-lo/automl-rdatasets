@@ -12,6 +12,7 @@ from src.search import spacy_preprocessor
 from src.search import spacy_similarity
 from src.automl import clean_data
 from src.automl import encode_data
+from src.automl import run_automl
 
 
 # Load a blank spaCy model
@@ -262,7 +263,6 @@ def main():
         # Categorical variables config
         if cat_variables:
             st.write('---')
-            num_cat = len(cat_variables)
             st.header('Categorical variables')
             with st.beta_expander('View instructions'):
                 st.markdown(
@@ -304,16 +304,16 @@ def main():
     st.write('')  # Blank line
     col1, col2, col3 = st.beta_columns(3)
     # Buttons
-    run_profiling = col1.button('🔬 Data profiling report')
-    run_na_report = col2.button('🔎 Missing value plots')
-    run_automl = col3.button('✨ Run AutoML!')
+    select_profiling = col1.button('🔬 Data profiling report')
+    select_na_report = col2.button('🔎 Missing value plots')
+    select_automl = col3.button('✨ Run AutoML!')
     st.write('---')
     # Data profiling
-    if run_profiling:
+    if select_profiling:
         profile_report = ProfileReport(data, explorative=True)
         st_profile_report(profile_report)
     # Missing value analysis
-    if run_na_report:
+    if select_na_report:
         # Check if there are any missing values
         if pd.notna(data).all().all():
             st.warning('No missing values in dataset')
@@ -326,7 +326,7 @@ def main():
             st.pyplot(fig3)
     # Run data workflow
     # Initialise categorical variables arguments
-    if run_automl:
+    if select_automl:
         is_ordered = [k for k, v in cats_config.items() if v[0] == 'Yes']
         categories = {k: v[1] for k, v in cats_config.items()}
         # Clean data
@@ -348,6 +348,7 @@ def main():
                                  test_size,
                                  **automl_config)
         # Display code for best ML pipeline found
+        st.balloons()  # Celebrate with balloons
         st.markdown(
             """
             ```python
