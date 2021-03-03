@@ -19,13 +19,9 @@ You can find the live demo [here](https://automl-rdatasets.herokuapp.com/).
 3. Select an outcome variable and supervised ML task (regression or classification) to perform 
 4. Press the "Run AutoML" button to perform AutoML and generate Python code for the best ML pipeline
 
-Note 1. To prevent using up my Heroku credits, the running time for pipeline optimization is limited to
-to 5 minutes max.
-
-Note 2. In practice, AutoML with TPOT should be run with multiple instances in parallel
-for much longer (hours or days).
-
-Note 3. Given these limits, the Live Demo is primary purpose is to find R datasets, perform EDA, and 
+To prevent using up my Heroku credits, the running time for pipeline optimization is limited to
+to 5 minutes max. In practice, AutoML with TPOT should be run with multiple instances in parallel
+for much longer (hours or days). Given these limits, the Live Demo is primary purpose is to find R datasets, perform EDA, and 
 demonstrate the implementation of TPOT as a data app.
 
 ## Install
