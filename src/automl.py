@@ -100,7 +100,8 @@ def encode_data(data: pd.DataFrame) -> pd.DataFrame:
     if unordered.any():
         data = pd.get_dummies(data, columns=unordered, dummy_na=True)
     if ordered.any():
-        data.iloc[:, ordered] = data.iloc[:, ordered].cat.codes
+        data.iloc[:, ordered] = (data.loc[:, ordered]
+                                      apply(lambda x: x.cat.codes)
     return data
 
 
