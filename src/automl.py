@@ -85,20 +85,20 @@ def clean_data(
 
 
 def encode_data(data: pd.DataFrame) -> pd.DataFrame:
-    """Transforms columns with unordered `category` dtype
-    using `pd.get_dummies`. Transforms columns with ordered `category`
-    dtype using `series.cat.codes`.
+    """Transforms columns with `category` dtype using `series.cat.codes`.
     """
     unordered_mask = data.apply(lambda col: is_categorical_dtype(col) and
                                 not(col.cat.ordered))
     ordered_mask = data.apply(lambda col: is_categorical_dtype(col) and
                               col.cat.ordered)
     unordered = (data.loc[:, unordered_mask]
-                     .columns)
+                     .columns
+                     .tolist())
     ordered = (data.loc[:, ordered_mask]
-                   .columns)
-    data.loc[:, ordered] = (data.loc[:, ordered + unordered]
-                                .apply(lambda x: x.cat.codes))
+                   .columns
+                   .tolist())
+    data.loc[:, ordered + unordered] = (data.loc[:, ordered + unordered]
+                                            .apply(lambda x: x.cat.codes))
     return data
 
 
@@ -112,16 +112,12 @@ def run_automl(data: pd.DataFrame,
     of Python code.
     """
     # Outcome
-    # Select outcome col (and its dummies if any)
-    outcome_cols = [outcome_col] + (data.columns
-                                        .str
-                                        .match(f'{outcome_col}_')
-                                        .tolist())
+    data = data.rename(columns={outcome_col: 'target'})  # Rename outcome col
     # Filter only valid columns
     # with potentially not-found cols (i.e. dummies)
-    outcome = data.loc[:, data.columns.intersection(outcome_cols)]
+    outcome = data.loc[:, 'target']
     # Features
-    features = data.loc[:, ~data.columns.isin(outcome.columns)]
+    features = data.loc[:, ~data.columns.str.match('target')]
     if len(outcome) == 1:
         outcome = outcome[0]
     # Split dataset
