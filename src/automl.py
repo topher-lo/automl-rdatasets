@@ -97,11 +97,8 @@ def encode_data(data: pd.DataFrame) -> pd.DataFrame:
                      .columns)
     ordered = (data.loc[:, ordered_mask]
                    .columns)
-    if unordered.any():
-        data = pd.get_dummies(data, columns=unordered, dummy_na=True)
-    if ordered.any():
-        data.iloc[:, ordered] = (data.loc[:, ordered]
-                                      apply(lambda x: x.cat.codes)
+    data.loc[:, ordered] = (data.loc[:, ordered + unordered]
+                                .apply(lambda x: x.cat.codes))
     return data
 
 
@@ -142,7 +139,6 @@ def run_automl(data: pd.DataFrame,
     # Export Python code for best pipeline found
     pipeline_code = tpot.export()
     return pipeline_code
-
 
 
 if __name__ == "__main__":
