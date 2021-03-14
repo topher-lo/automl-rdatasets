@@ -16,10 +16,8 @@ Run AutoML to find and generate Python code for an optimised ML pipeline!
 3. Select an outcome variable and supervised ML task (regression or classification) to perform 
 4. Press the "Run AutoML" button to perform AutoML and generate Python code for the best ML pipeline
 
-To prevent using up my Heroku credits, the running time for pipeline optimization is limited to
-to 5 minutes max. In practice, AutoML with TPOT should be run with multiple instances in parallel
-for much longer (hours or days). Given these limits, the Live Demo is primary purpose is to find R datasets, perform EDA, and 
-demonstrate the implementation of TPOT as a data app.
+Note: The running time for pipeline optimization is limited to to 5 minutes max. In practice, AutoML with TPOT should be run with multiple instances in parallel
+for much longer (hours or days). You can modify this limit by modifying the "Maximum running time" Streamlit slider in `app.py`.
 
 ## Install
 automl-rdatasets has been tested on Python 3.8 and depends on the following packages:
