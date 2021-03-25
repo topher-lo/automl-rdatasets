@@ -27,8 +27,8 @@ def _obj_wrangler(data: pd.DataFrame) -> pd.DataFrame:
 
 def _factor_wrangler(
     data: pd.DataFrame,
-    is_factor: Union[None, List[str]],
-    is_ordered: Union[None, List[str]],
+    cat_cols: Union[None, List[str]],
+    ordered_cols: Union[None, List[str]],
     categories: Union[None, Mapping[str, List[Union[str, int, float]]]] = None,
     str_to_cat: bool = True,
 ) -> pd.DataFrame:
@@ -36,16 +36,16 @@ def _factor_wrangler(
     If `str_to_cat` is set to True, converts all `StringDtype` columns
     to `CategoricalDtype`.
     """
-    cat_cols = []
+    all_cat_cols = []
     if str_to_cat:
         str_cols = (data.select_dtypes(include=['string'])
                         .columns
                         .tolist())
         cat_cols += str_cols
-    if is_factor:
-        cat_cols += is_factor
     if cat_cols:
-        for col in cat_cols:
+        all_cat_cols += cat_cols
+    if all_cat_cols:
+        for col in all_cat_cols:
             data.loc[:, col] = (data.loc[:, col]
                                     .astype('category'))
     # Set categories
@@ -55,8 +55,8 @@ def _factor_wrangler(
                                     .cat
                                     .set_categories(cats))
     # Set is_ordered
-    if is_ordered:
-        for cat in is_ordered:
+    if ordered_cols:
+        for col in ordered_cols:
             data.loc[:, col] = (data.loc[:, col]
                                     .cat
                                     .as_ordered())
@@ -65,8 +65,8 @@ def _factor_wrangler(
 
 def clean_data(
     data: pd.DataFrame,
-    is_factor: Union[None, List[str]] = None,
-    is_ordered: Union[None, List[str]] = None,
+    cat_cols: Union[None, List[str]] = None,
+    ordered_cols: Union[None, List[str]] = None,
     categories: Union[None, Mapping[str, List[Union[str, int, float]]]] = None,
     str_to_cat: bool = True,
 ) -> pd.DataFrame:
@@ -77,8 +77,8 @@ def clean_data(
     """
     data = (data.pipe(_obj_wrangler)
                 .pipe(_factor_wrangler,
-                      is_factor,
-                      is_ordered,
+                      cat_cols,
+                      ordered_cols,
                       categories,
                       str_to_cat))
     return data
@@ -126,12 +126,17 @@ def run_automl(data: pd.DataFrame,
                                                         test_size=test_size,
                                                         train_size=train_size)
     # Optimise pipeline
-    if ml_task == 'Classification':
-        tpot = TPOTClassifier(**kwargs)
-        tpot.fit(X_train, y_train)
-    else:
-        tpot = TPOTRegressor(**kwargs)
-        tpot.fit(X_train, y_train)
+    try:
+        if ml_task == 'Classification':
+            tpot = TPOTClassifier(**kwargs)
+            tpot.fit(X_train, y_train)
+        else:
+            tpot = TPOTRegressor(**kwargs)
+            tpot.fit(X_train, y_train)
+    except ValueError as e:
+        if 'A pipeline has not yet been optimized.' in str(e):
+            raise ValueError('A pipeline has not yet been optimized.'
+                             ' Please modify the settings and try again.')
     # Export Python code for best pipeline found
     pipeline_code = tpot.export()
     return pipeline_code

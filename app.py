@@ -254,8 +254,8 @@ def main():
         st.write('')  # Blank line
         st.write('')  # Blank line
         # Select categorical variables
-        cat_variables = st.multiselect('Are there any categorical variables?',
-                                       options=data.columns)
+        cat_cols = st.multiselect('Are there any categorical variables?',
+                              options=data.columns)
         # Select outcome variable
         outcome = st.selectbox('What is the outcome variable?',
                                options=data.columns)
@@ -263,7 +263,7 @@ def main():
         # Set categorical configs
         cats_config = {}
         # Categorical variables config
-        if cat_variables:
+        if cat_cols:
             st.write('---')
             st.header('Categorical variables')
             with st.beta_expander('View instructions'):
@@ -286,9 +286,9 @@ def main():
                     represented as `pd.NA` in the dataframe.
                     """
                 )
-            for i in range(len(cat_variables)):
+            for i in range(len(cat_cols)):
                 st.write('')  # Insert blank line
-                cat = cat_variables[i]
+                cat = cat_cols[i]
                 st.subheader('{}. {}'.format(i+1, cat))
                 is_cat_ordered = st.radio('Is this variable ordered?',
                                           ('Yes', 'No'),
@@ -329,12 +329,12 @@ def main():
     # Run data workflow
     # Initialise categorical variables arguments
     if select_automl:
-        is_ordered = [k for k, v in cats_config.items() if v[0] == 'Yes']
+        ordered_cols = [k for k, v in cats_config.items() if v[0] == 'Yes']
         categories = {k: v[1] for k, v in cats_config.items()}
         # Clean data
         cleaned_data = clean_data(data,
-                                  is_factor=cat_variables,
-                                  is_ordered=is_ordered,
+                                  cat_cols=cat_cols,
+                                  ordered_cols=ordered_cols,
                                   categories=categories)
         # Encoded data
         encoded_data = encode_data(cleaned_data)
