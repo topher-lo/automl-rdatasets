@@ -23,7 +23,7 @@ You can find the live demo [here](https://share.streamlit.io/topher-lo/automl-rd
 Note: The running time for pipeline optimization is limited to to 5 minutes max. In practice, AutoML with TPOT should be run with multiple instances in parallel
 for much longer (hours or days). You can modify this limit by modifying the "Maximum running time" Streamlit slider in `app.py`.
 
-## Install
+## 🚀 Install
 automl-rdatasets has been tested on Python 3.8 and depends on the following packages:
 - `sklearn`
 - `spacy`
@@ -58,7 +58,7 @@ docker-compose build
 docker-compose up -d
 ```
 
-## 🚀 How to run this demo
+## ✨ How to run this demo
 In your virtual environment, run the following command from the `automl-rdatasets` dir:
 ```bash
 streamlit run app.py
