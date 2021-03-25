@@ -72,12 +72,6 @@ def sidebar(data=None):
         'F1 score': 'f1'
     }
     scoring_code = scoring_name_code[scoring]
-    test_size = st.sidebar.slider('What percentage of the data'
-                                  ' is in the test set?',
-                                  min_value=0.0,
-                                  max_value=1.0,
-                                  value=0.25,
-                                  step=0.01)
     train_size = st.sidebar.slider('What percentage of the data'
                                    ' is in the training set?',
                                    min_value=0.0,
@@ -87,22 +81,22 @@ def sidebar(data=None):
     generations = st.sidebar.slider('How many iterations should the'
                                     ' pipeline optimisation process'
                                     ' run for?',
-                                    min_value=1,
-                                    max_value=10,
+                                    min_value=2,
+                                    max_value=20,
                                     value=5,
                                     step=1)
     max_time = st.sidebar.slider('Maximum running time'
                                  ' (in minutes) to'
                                  ' optimise pipeline',
-                                 min_value=1,
-                                 max_value=5,
-                                 value=2,
+                                 min_value=2,
+                                 max_value=10,
+                                 value=5,
                                  step=1)
     max_eval_time = st.sidebar.slider('Maximum running time to'
                                       ' (in minutes) to evaluate each pipeline',
-                                      min_value=1,
-                                      max_value=2,
-                                      value=1,
+                                      min_value=2,
+                                      max_value=5,
+                                      value=3,
                                       step=1)
     pop_size = st.sidebar.number_input('How many observations should be'
                                        ' retained in the genetic programming'
@@ -133,7 +127,6 @@ def sidebar(data=None):
                                               value=5,
                                               step=1)
     return {'ml_task': ml_task,
-            'test_size': test_size,
             'train_size': train_size,
             'automl_config': automl_config,
             'cutoff_similarity': cutoff_similarity,
@@ -255,7 +248,7 @@ def main():
         st.write('')  # Blank line
         # Select categorical variables
         cat_cols = st.multiselect('Are there any categorical variables?',
-                              options=data.columns)
+                                  options=data.columns)
         # Select outcome variable
         outcome = st.selectbox('What is the outcome variable?',
                                options=data.columns)
@@ -340,8 +333,8 @@ def main():
         encoded_data = encode_data(cleaned_data)
         # Model data
         ml_task = options.get('ml_task')
-        test_size = options.get('test_size')
         train_size = options.get('train_size')
+        test_size = 1-train_size
         automl_config = options.get('automl_config')
         with st.spinner('Finding optimal pipeline...'):
             try:
@@ -351,18 +344,17 @@ def main():
                                          train_size,
                                          test_size,
                                          **automl_config)
+                # Display code for best ML pipeline found
+                st.success('Done!')
+                st.markdown(
+                    """
+                    ```python
+                    {}
+                    ```
+                    """.format(automl_code)
+                )
             except ValueError as e:
                 st.error(e)
-
-        # Display code for best ML pipeline found
-        st.success('Done!')
-        st.markdown(
-            """
-            ```python
-            {}
-            ```
-            """.format(automl_code)
-        )
 
 
 if __name__ == "__main__":

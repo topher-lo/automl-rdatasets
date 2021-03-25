@@ -20,8 +20,7 @@ You can find the live demo [here](https://share.streamlit.io/topher-lo/automl-rd
 3. Select an outcome variable and supervised ML task (regression or classification) to perform 
 4. Press the "Run AutoML" button to perform AutoML and generate Python code for the best ML pipeline
 
-Note: The running time for pipeline optimization is limited to to 5 minutes max. In practice, AutoML with TPOT should be run with multiple instances in parallel
-for much longer (hours or days). You can modify this limit by modifying the "Maximum running time" Streamlit slider in `app.py`.
+Note: The running time for pipeline optimization and evaluation time per iteration is limited to to 10 minutes max. In practice, AutoML with TPOT should be run with multiple instances in parallel for much longer (hours or days). You can modify this limit by modifying the "Maximum running time" Streamlit slider in `app.py`.
 
 ## 🚀 Install
 automl-rdatasets has been tested on Python 3.8 and depends on the following packages:

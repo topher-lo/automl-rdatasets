@@ -123,20 +123,15 @@ def run_automl(data: pd.DataFrame,
     # Split dataset
     X_train, X_test, y_train, y_test = train_test_split(features,
                                                         outcome,
-                                                        test_size=test_size,
-                                                        train_size=train_size)
+                                                        train_size=train_size,
+                                                        test_size=test_size)
     # Optimise pipeline
-    try:
-        if ml_task == 'Classification':
-            tpot = TPOTClassifier(**kwargs)
-            tpot.fit(X_train, y_train)
-        else:
-            tpot = TPOTRegressor(**kwargs)
-            tpot.fit(X_train, y_train)
-    except ValueError as e:
-        if 'A pipeline has not yet been optimized.' in str(e):
-            raise ValueError('A pipeline has not yet been optimized.'
-                             ' Please modify the settings and try again.')
+    if ml_task == 'Classification':
+        tpot = TPOTClassifier(**kwargs)
+        tpot.fit(X_train, y_train)
+    else:
+        tpot = TPOTRegressor(**kwargs)
+        tpot.fit(X_train, y_train)
     # Export Python code for best pipeline found
     pipeline_code = tpot.export()
     return pipeline_code
