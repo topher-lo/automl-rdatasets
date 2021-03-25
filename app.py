@@ -344,12 +344,16 @@ def main():
         train_size = options.get('train_size')
         automl_config = options.get('automl_config')
         with st.spinner('Finding optimal pipeline...'):
-            automl_code = run_automl(encoded_data,
-                                     outcome,
-                                     ml_task,
-                                     train_size,
-                                     test_size,
-                                     **automl_config)
+            try:
+                automl_code = run_automl(encoded_data,
+                                         outcome,
+                                         ml_task,
+                                         train_size,
+                                         test_size,
+                                         **automl_config)
+            except ValueError as e:
+                st.error(e)
+
         # Display code for best ML pipeline found
         st.success('Done!')
         st.markdown(
