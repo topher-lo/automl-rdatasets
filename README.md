@@ -1,6 +1,7 @@
 # automl-rdatasets
 [![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
 [![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/topher-lo/automl-rdatasets/main/app.py)
 
 🔎🧙 Contextual search and autoML on R datasets using spacy and tpot. Served as a Streamlit web app.
 Find inspiration (and starter code) for your next ML project.
@@ -9,6 +10,9 @@ Search for a dataset in your domain of interest from R's extensive
 Run AutoML to find and generate Python code for an optimised ML pipeline!
 
 ![automl-rdatasets demo](https://github.com/topher-lo/automl-rdatasets/blob/main/media/recording.gif)
+
+## 🎬 Live Demo
+You can find the live demo [here](https://share.streamlit.io/topher-lo/automl-rdatasets/main/app.py).
 
 ### Using the app:
 1. Find relevant R datasets using the search bar
