@@ -354,7 +354,9 @@ def main():
                     """.format(automl_code)
                 )
             except ValueError as e:
-                st.error(e)
+                st.error(f'{e}. Please modify the settings and try again.')
+            except RuntimeError as e:
+                st.error(f'{e}. Please modify the settings and try again.')
 
 
 if __name__ == "__main__":
