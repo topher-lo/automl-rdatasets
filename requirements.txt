@@ -8,3 +8,4 @@ missingno
 tpot
 pandas
 wheel
+https://github.com/explosion/spacy-models/archive/refs/tags/en_core_web_md-3.0.0.tar.gz
