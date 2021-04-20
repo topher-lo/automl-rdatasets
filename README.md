@@ -1,6 +1,6 @@
 # automl-rdatasets
-[![MIT License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/)
+[![MIT License](https://img.shields.io/badge/license-MIT-informational.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8](https://img.shields.io/badge/python-3.8-informational.svg)](https://www.python.org/downloads/)
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/topher-lo/automl-rdatasets/main/app.py)
 
 🔎🧙 Contextual search and autoML on R datasets using spacy and tpot. Served as a Streamlit web app.
